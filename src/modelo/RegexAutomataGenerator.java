@@ -1,4 +1,4 @@
-package org.example;
+package modelo;
 
 import javax.swing.*;
 import java.awt.*;
