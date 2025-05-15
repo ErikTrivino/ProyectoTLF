@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.regex.*;
 
 public class RegexAutomataGenerator extends JFrame {
-
+/*
     private JTextField cadenaField;
     private DefaultListModel<String> cadenasModel;
     private DefaultListModel<String> resultadosModel;
@@ -124,7 +124,7 @@ public class RegexAutomataGenerator extends JFrame {
                     Matcher matcher = patrones[j].matcher(texto);
                     if (matcher.find() && matcher.start() == 0) {
                         String token = matcher.group();
-                        resultadosModel.addElement(new Token(categorias[j].toString(), token).toString());
+                        resultadosModel.addElement(new Tokenv1(categorias[j].toString(), token).toString());
                         texto = texto.substring(matcher.end());
                         encontrado = true;
                         break;
@@ -133,9 +133,9 @@ public class RegexAutomataGenerator extends JFrame {
 
                 if (!encontrado) {
                     if (texto.startsWith("\"")) {
-                        resultadosModel.addElement(new Token(TipoToken.UNTERMINATED_STRING.toString(), texto).toString());
+                        resultadosModel.addElement(new Tokenv1(TipoToken.UNTERMINATED_STRING.toString(), texto).toString());
                     } else {
-                        resultadosModel.addElement(new Token(TipoToken.UNKNOWN_TOKEN.toString(), texto).toString());
+                        resultadosModel.addElement(new Tokenv1(TipoToken.UNKNOWN_TOKEN.toString(), texto).toString());
                     }
                     break;
                 }
@@ -181,12 +181,25 @@ public class RegexAutomataGenerator extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(RegexAutomataGenerator::new);
-    }
+    }*/
 }
 
 // Enum con las categorías léxicas
 
 
 // Clase Token
+    class Tokenv1 {
+    String tipo;
+    String valor;
 
+    public Tokenv1(String tipo, String valor) {
+        this.tipo = tipo;
+        this.valor = valor;
+    }
+
+    @Override
+    public String toString() {
+        return tipo + ": " + valor;
+    }
+}
 
