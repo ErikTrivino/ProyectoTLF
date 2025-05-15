@@ -60,24 +60,60 @@ public class RegexAutomataGenerator extends JFrame {
     private void analizarCadenas() {
         resultadosModel.clear();
 
-        // Lista de patrones y sus tipos
         Pattern[] patrones = new Pattern[]{
-                Pattern.compile("\\b(if|fi|then|else|for|while|do|done|echo)\\b"),  // Palabras clave
-                Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*"),  // Identificadores
-                Pattern.compile("\\b\\d+(\\.\\d+)?\\b"),    // Números
-                Pattern.compile("(\"[^\"]*\"|'[^']*')"),    // Cadenas
-                Pattern.compile("(==|!=|&&|\\|\\||=|\\+|-|\\*|/|%)"), // Operadores
-                Pattern.compile("#.*")                      // Comentarios
+                Pattern.compile("\\b(if|fi|then|else|for|while|do|done|echo)\\b"), // KEYWORD
+                Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]{0,9}"), // IDENTIFIER
+                Pattern.compile("\\b\\d+\\b"), // NATURAL_NUMBER
+                Pattern.compile("\\b\\d+\\.\\d+\\b"), // REAL_NUMBER
+                Pattern.compile("(\\+|\\-|\\*|/|%|\\*\\*)"), // ARITHMETIC_OPERATOR
+                Pattern.compile("(-eq|-ne|-lt|-le|-gt|-ge|==|!=|<|>)"), // COMPARISON_OPERATOR
+                Pattern.compile("(&&|\\|\\||!)"), // LOGICAL_OPERATOR
+                Pattern.compile("="), // ASSIGNMENT_OPERATOR
+                Pattern.compile("(\\+\\+|--)", Pattern.LITERAL), // INCREMENT_DECREMENT_OPERATOR
+                Pattern.compile("\\("), // OPEN_PARENTHESIS
+                Pattern.compile("\\)"), // CLOSE_PARENTHESIS
+                Pattern.compile("\\{"), // OPEN_BRACE
+                Pattern.compile("\\}"), // CLOSE_BRACE
+                Pattern.compile(";"), // STATEMENT_TERMINATOR
+                Pattern.compile(","), // SEPARATOR
+                Pattern.compile("(\"([^\\\"]|\\.)*\"|'([^\\']|\\.)*')"), // STRING_LITERAL
+                Pattern.compile("#.*"), // LINE_COMMENT
+                Pattern.compile(":\\s*'([\\s\\S]*?)'"), // BLOCK_COMMENT
+
+                Pattern.compile("\\["), // OPEN_BRACE o SYMBOL
+                Pattern.compile("\\]"), // CLOSE_BRACE o SYMBOL
+                Pattern.compile("-gt|-lt|-eq|-ne|-ge|-le"), // COMPARISON_OPERATOR (ya está, pero tal vez mal ubicado)
+                Pattern.compile("then"), // KEYWORD (falta incluirlo si no está bien capturado)
+
         };
 
-        String[] tipos = new String[]{
-                "Palabra clave", "Identificador", "Número", "Cadena", "Operador", "Comentario"
+        TipoToken[] categorias = new TipoToken[]{
+                TipoToken.KEYWORD,
+                TipoToken.IDENTIFIER,
+                TipoToken.NATURAL_NUMBER,
+                TipoToken.REAL_NUMBER,
+                TipoToken.ARITHMETIC_OPERATOR,
+                TipoToken.COMPARISON_OPERATOR,
+                TipoToken.LOGICAL_OPERATOR,
+                TipoToken.ASSIGNMENT_OPERATOR,
+                TipoToken.INCREMENT_DECREMENT_OPERATOR,
+                TipoToken.OPEN_PARENTHESIS,
+                TipoToken.CLOSE_PARENTHESIS,
+                TipoToken.OPEN_BRACE,
+                TipoToken.CLOSE_BRACE,
+                TipoToken.STATEMENT_TERMINATOR,
+                TipoToken.SEPARATOR,
+                TipoToken.STRING_LITERAL,
+                TipoToken.LINE_COMMENT,
+                TipoToken.BLOCK_COMMENT,
+                TipoToken.CLOSE_BRACE,
+                TipoToken.CLOSE_BRACE,
+                TipoToken.COMPARISON_OPERATOR,
+                TipoToken.KEYWORD
         };
 
         for (int i = 0; i < cadenasModel.size(); i++) {
-            String linea = cadenasModel.get(i);
-            String texto = linea.strip();
-
+            String texto = cadenasModel.get(i).strip();
             boolean encontrado;
 
             while (!texto.isEmpty()) {
@@ -88,7 +124,7 @@ public class RegexAutomataGenerator extends JFrame {
                     Matcher matcher = patrones[j].matcher(texto);
                     if (matcher.find() && matcher.start() == 0) {
                         String token = matcher.group();
-                        resultadosModel.addElement(new Token(tipos[j], token).toString());
+                        resultadosModel.addElement(new Token(categorias[j].toString(), token).toString());
                         texto = texto.substring(matcher.end());
                         encontrado = true;
                         break;
@@ -96,17 +132,19 @@ public class RegexAutomataGenerator extends JFrame {
                 }
 
                 if (!encontrado) {
-                    resultadosModel.addElement("Error: token inválido en -> " + texto);
+                    if (texto.startsWith("\"")) {
+                        resultadosModel.addElement(new Token(TipoToken.UNTERMINATED_STRING.toString(), texto).toString());
+                    } else {
+                        resultadosModel.addElement(new Token(TipoToken.UNKNOWN_TOKEN.toString(), texto).toString());
+                    }
                     break;
                 }
             }
-
             resultadosModel.addElement("────────────");
         }
     }
 
     private void generarDotYGraficar() {
-        // Modo demostrativo — graficar solo una transición genérica
         String dot = "digraph automata {\n" +
                 "    rankdir=LR;\n" +
                 "    node [shape = doublecircle]; qf;\n" +
@@ -145,5 +183,10 @@ public class RegexAutomataGenerator extends JFrame {
         SwingUtilities.invokeLater(RegexAutomataGenerator::new);
     }
 }
+
+// Enum con las categorías léxicas
+
+
+// Clase Token
 
 
