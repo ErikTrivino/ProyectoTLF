@@ -1,0 +1,7 @@
+digraph automata {
+    rankdir=LR;
+    node [shape = doublecircle]; qf;
+    node [shape = circle];
+    q0 -> q1 [ label = "token" ];
+    q1 -> qf [ label = "ε" ];
+}
