@@ -82,6 +82,9 @@ public class RegexAutomataGeneratorV2 extends JFrame {
         boolean dentroCadena = false;
         char delimitadorCadena = ' ';
 
+        // Lista de operadores de comparación válidos en bash
+        String[] comparadores = {"-eq", "-ne", "-lt", "-le", "-gt", "-ge"};
+
         for (int i = 0; i < linea.length(); i++) {
             char c = linea.charAt(i);
 
@@ -108,25 +111,40 @@ public class RegexAutomataGeneratorV2 extends JFrame {
                     tokens.add(buffer.toString());
                     buffer.setLength(0);
                 }
-            } else if ("[](){};,+-*/=%<>!&|".indexOf(c) != -1) {
-                if (buffer.length() > 0) {
-                    tokens.add(buffer.toString());
-                    buffer.setLength(0);
-                }
-                tokens.add(Character.toString(c));
             } else {
                 buffer.append(c);
+
+                // Verificar si lo que llevamos acumulado es un operador de comparación completo
+                for (String op : comparadores) {
+                    if (buffer.toString().equals(op)) {
+                        tokens.add(buffer.toString());
+                        buffer.setLength(0);
+                        break;
+                    }
+                }
+
+                // Si el siguiente carácter es espacio o separador, vaciar el buffer
+                if (i + 1 == linea.length() || Character.isWhitespace(linea.charAt(i + 1)) ||
+                        "[](){};,+-*/=%<>!&|".indexOf(linea.charAt(i + 1)) != -1) {
+                    if (buffer.length() > 0) {
+                        tokens.add(buffer.toString());
+                        buffer.setLength(0);
+                    }
+                }
             }
         }
+
         if (buffer.length() > 0) tokens.add(buffer.toString());
         return tokens;
     }
 
+
     private TipoToken clasificar(String lexema) {
+        if (AutomataOperadorComparacion.reconocer(lexema)) return TipoToken.COMPARISON_OPERATOR;
         if (AutomataPalabraClave.reconocer(lexema)) return TipoToken.KEYWORD;
         if (AutomataNumeroNatural.reconocer(lexema)) return TipoToken.NATURAL_NUMBER;
         if (AutomataNumeroReal.reconocer(lexema)) return TipoToken.REAL_NUMBER;
-        if (AutomataOperadorComparacion.reconocer(lexema)) return TipoToken.COMPARISON_OPERATOR;
+        //if (AutomataOperadorComparacion.reconocer(lexema)) return TipoToken.COMPARISON_OPERATOR;
         if (AutomataOperadorLogico.reconocer(lexema)) return TipoToken.LOGICAL_OPERATOR;
         if (AutomataOperadorAritmetico.reconocer(lexema)) return TipoToken.ARITHMETIC_OPERATOR;
         if (AutomataAsignacion.reconocer(lexema)) return TipoToken.ASSIGNMENT_OPERATOR;
