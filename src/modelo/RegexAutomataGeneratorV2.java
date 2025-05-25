@@ -143,6 +143,7 @@ public class RegexAutomataGeneratorV2 extends JFrame {
         if (AutomataOperadorComparacion.reconocer(lexema)) return TipoToken.COMPARISON_OPERATOR;
         if (AutomataPalabraClave.reconocer(lexema)) return TipoToken.KEYWORD;
         if (AutomataNumeroNatural.reconocer(lexema)) return TipoToken.NATURAL_NUMBER;
+        if (AutomataEnteroConSigno.reconocer(lexema)) return TipoToken.SIGNED_INTEGER;
         if (AutomataNumeroReal.reconocer(lexema)) return TipoToken.REAL_NUMBER;
         //if (AutomataOperadorComparacion.reconocer(lexema)) return TipoToken.COMPARISON_OPERATOR;
         if (AutomataOperadorLogico.reconocer(lexema)) return TipoToken.LOGICAL_OPERATOR;

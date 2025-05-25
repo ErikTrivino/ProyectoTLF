@@ -42,16 +42,45 @@ class Token {
     }
 }
 
- class AutomataNumeroReal {
+ class AutomataEnteroConSigno {
+    public static boolean reconocer(String input) {
+        if (input == null || input.isEmpty()) return false;
+
+        int start = 0;
+        if (input.charAt(0) == '-') {
+            if (input.length() == 1) return false; // solo "-" no es válido
+            start = 1;
+        }
+
+        for (int i = start; i < input.length(); i++) {
+            if (!Character.isDigit(input.charAt(i))) return false;
+        }
+
+        return true;
+    }
+}
+
+
+class AutomataNumeroReal {
     public static boolean reconocer(String input) {
         if (!input.contains(".")) return false;
-        String[] partes = input.split("\\.");
+
+        int signo = 0;
+        if (input.startsWith("-")) {
+            if (input.length() == 1) return false; // solo "-"
+            signo = 1;
+        }
+
+        String sinSigno = input.substring(signo); // elimina el signo para dividir
+        String[] partes = sinSigno.split("\\.");
         if (partes.length != 2) return false;
+
         return AutomataNumeroNatural.reconocer(partes[0]) && AutomataNumeroNatural.reconocer(partes[1]);
     }
 }
 
- class AutomataOperadorComparacion {
+
+class AutomataOperadorComparacion {
     private static final String[] operadores = {
             "-eq", "-ne", "-lt", "-le", "-gt", "-ge", "==", "!=", "<", ">"
     };

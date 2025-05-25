@@ -9,6 +9,8 @@ public enum TipoToken {
 
     // Números
     NATURAL_NUMBER,
+
+    SIGNED_INTEGER,
     REAL_NUMBER,
 
     // Operadores
