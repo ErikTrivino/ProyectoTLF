@@ -88,11 +88,14 @@ public class RegexAutomataGeneratorV2 extends JFrame {
                 "==", "!=", "<=", ">=", "-eq", "-ne", "-lt", "-le", "-gt", "-ge", "&&", "||", "**", "++", "--"
         };
 
+// Caracteres que pueden ser operadores unarios (como '!' o '=' solos)
+        String caracteresSeparables = "!&|=<>+-*/%;,(){}[]";
+
         int i = 0;
         while (i < linea.length()) {
             char c = linea.charAt(i);
 
-            // Si estamos dentro de una cadena
+            // Dentro de una cadena (comillas simples o dobles)
             if (dentroCadena) {
                 buffer.append(c);
                 if (c == delimitadorCadena) {
@@ -104,7 +107,7 @@ public class RegexAutomataGeneratorV2 extends JFrame {
                 continue;
             }
 
-            // Inicia cadena (comilla simple o doble)
+            // Inicia cadena
             if (c == '"' || c == '\'') {
                 if (buffer.length() > 0) {
                     tokens.add(buffer.toString());
@@ -117,7 +120,7 @@ public class RegexAutomataGeneratorV2 extends JFrame {
                 continue;
             }
 
-            // Espacio: termina token
+            // Espacio: cerrar token actual
             if (Character.isWhitespace(c)) {
                 if (buffer.length() > 0) {
                     tokens.add(buffer.toString());
@@ -127,7 +130,7 @@ public class RegexAutomataGeneratorV2 extends JFrame {
                 continue;
             }
 
-            // Intentamos leer un operador múltiple (2 o 3 caracteres)
+            // Verifica si hay un operador múltiple en esta posición
             boolean operadorDetectado = false;
             for (String op : operadoresMultiples) {
                 int len = op.length();
@@ -147,25 +150,40 @@ public class RegexAutomataGeneratorV2 extends JFrame {
             }
             if (operadorDetectado) continue;
 
-            // Si no es operador múltiple, agregamos carácter al buffer
-            buffer.append(c);
-            i++;
-
-            // Si el siguiente carácter es separador, terminamos el token actual
-            if (i == linea.length() ||
-                    Character.isWhitespace(linea.charAt(i)) ||
-                    "[](){};,+-*/=%<>!&|".indexOf(linea.charAt(i)) != -1) {
+            // Si encontramos un operador unario unido a otra cosa (como !casa)
+            if (caracteresSeparables.indexOf(c) != -1) {
                 if (buffer.length() > 0) {
                     tokens.add(buffer.toString());
                     buffer.setLength(0);
                 }
+                tokens.add(String.valueOf(c));
+                i++;
+                continue;
+            }
+
+            // Agrega el carácter al buffer
+            buffer.append(c);
+            i++;
+
+            // Si el siguiente carácter es separador, cierra el token actual
+            if (i < linea.length()) {
+                char siguiente = linea.charAt(i);
+                if (Character.isWhitespace(siguiente) || caracteresSeparables.indexOf(siguiente) != -1) {
+                    if (buffer.length() > 0) {
+                        tokens.add(buffer.toString());
+                        buffer.setLength(0);
+                    }
+                }
             }
         }
 
-// Agrega lo que queda en el buffer
-        if (buffer.length() > 0) tokens.add(buffer.toString());
+// Si quedó algo pendiente en el buffer
+        if (buffer.length() > 0) {
+            tokens.add(buffer.toString());
+        }
 
         return tokens;
+
     }
 
 
