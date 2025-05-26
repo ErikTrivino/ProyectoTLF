@@ -159,8 +159,9 @@ public class RegexAutomataGeneratorV2 extends JFrame {
         if (lexema.equals("]")) return TipoToken.CLOSE_BRACE;
         if (lexema.equals(";")) return TipoToken.STATEMENT_TERMINATOR;
         if (lexema.equals(",")) return TipoToken.SEPARATOR;
-        if (lexema.startsWith("\"") && lexema.endsWith("\"")) return TipoToken.STRING_LITERAL;
-        if (lexema.startsWith("#")) return TipoToken.LINE_COMMENT;
+        if (AutomataCadena.reconocer(lexema)) return TipoToken.STRING_LITERAL;
+        if (lexema.startsWith("\"") && !lexema.endsWith("\"")) return TipoToken.INCOMPLETE_STRING;
+        if (AutomataComentario.reconocer(lexema)) return TipoToken.LINE_COMMENT;
         return TipoToken.UNKNOWN_TOKEN;
     }
 

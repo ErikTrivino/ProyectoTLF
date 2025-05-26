@@ -21,7 +21,7 @@ class Token {
 
  class AutomataPalabraClave {
     private static final String[] palabrasClave = {
-            "if", "fi", "then", "else", "for", "while", "do", "done", "echo"
+            "if", "fi", "then", "else", "for", "while", "do", "done", "echo","_"
     };
 
     public static boolean reconocer(String input) {
@@ -140,4 +140,74 @@ class AutomataOperadorComparacion {
         }
         return true;
     }
+
 }
+
+ class AutomataCadena {
+    public static boolean reconocer(String input) {
+        if (input.length() < 2) return false;
+
+        char inicio = input.charAt(0);
+        char fin = input.charAt(input.length() - 1);
+
+        // Comillas simples: todo literal, sin escapes
+        if (inicio == '\'' && fin == '\'') {
+            for (int i = 1; i < input.length() - 1; i++) {
+                if (input.charAt(i) == '\'') {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Comillas dobles: permite escapes
+        if (inicio == '"' && fin == '"') {
+            boolean escape = false;
+            for (int i = 1; i < input.length() - 1; i++) {
+                char c = input.charAt(i);
+                if (escape) {
+                    escape = false;
+                } else if (c == '\\') {
+                    escape = true;
+                } else if (c == '"') {
+                    return false; // comilla sin escape
+                }
+            }
+            return !escape; // importante: no debe quedar \ colgado justo antes del cierre
+        }
+
+        return false;
+    }
+}
+
+class AutomataComentario {
+    public static boolean reconocer(String input) {
+        int estado = 0;
+        int i = 0;
+
+        while (i < input.length()) {
+            char c = input.charAt(i);
+            switch (estado) {
+                case 0:
+                    if (Character.isWhitespace(c)) {
+                        // seguimos en estado 0
+                        i++;
+                    } else if (c == '#') {
+                        estado = 1;
+                        i++;
+                    } else {
+                        return false; // no es un comentario
+                    }
+                    break;
+                case 1:
+                    // estado de comentario, acepta cualquier cosa hasta el final
+                    i++;
+                    break;
+            }
+        }
+
+        // estado 1 es de aceptación (se encontró al menos un '#')
+        return estado == 1;
+    }
+}
+

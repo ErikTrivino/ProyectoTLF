@@ -37,5 +37,8 @@ public enum TipoToken {
 
     // Error léxico
     UNTERMINATED_STRING,
-    UNKNOWN_TOKEN
+    UNKNOWN_TOKEN,
+
+    // Cadena sin cerrar
+    INCOMPLETE_STRING
 }
