@@ -41,7 +41,6 @@ class Token {
         return true;
     }
 }
-
  class AutomataEnteroConSigno {
     public static boolean reconocer(String input) {
         if (input == null || input.isEmpty()) return false;
@@ -51,40 +50,31 @@ class Token {
             if (input.length() == 1) return false; // solo "-" no es válido
             start = 1;
         }
-
         for (int i = start; i < input.length(); i++) {
             if (!Character.isDigit(input.charAt(i))) return false;
         }
-
         return true;
     }
 }
-
-
 class AutomataNumeroReal {
     public static boolean reconocer(String input) {
         if (!input.contains(".")) return false;
-
         int signo = 0;
         if (input.startsWith("-")) {
             if (input.length() == 1) return false; // solo "-"
             signo = 1;
         }
-
         String sinSigno = input.substring(signo); // elimina el signo para dividir
         String[] partes = sinSigno.split("\\.");
         if (partes.length != 2) return false;
-
         return AutomataNumeroNatural.reconocer(partes[0]) && AutomataNumeroNatural.reconocer(partes[1]);
     }
 }
-
 
 class AutomataOperadorComparacion {
     private static final String[] operadores = {
             "-eq", "-ne", "-lt", "-le", "-gt", "-ge", "==", "!=", "<", ">"
     };
-
     public static boolean reconocer(String input) {
         for (String op : operadores) {
             if (op.equals(input)) return true;
@@ -92,7 +82,6 @@ class AutomataOperadorComparacion {
         return false;
     }
 }
-
  class AutomataOperadorLogico {
     private static final String[] operadores = {
             "&&", "||", "!"
@@ -105,12 +94,10 @@ class AutomataOperadorComparacion {
         return false;
     }
 }
-
  class AutomataOperadorAritmetico {
     private static final String[] operadores = {
             "+", "-", "*", "/", "%", "**"
     };
-
     public static boolean reconocer(String input) {
         for (String op : operadores) {
             if (op.equals(input)) return true;
@@ -146,10 +133,8 @@ class AutomataOperadorComparacion {
  class AutomataCadena {
     public static boolean reconocer(String input) {
         if (input.length() < 2) return false;
-
         char inicio = input.charAt(0);
         char fin = input.charAt(input.length() - 1);
-
         // Comillas simples: todo literal, sin escapes
         if (inicio == '\'' && fin == '\'') {
             for (int i = 1; i < input.length() - 1; i++) {
@@ -159,7 +144,6 @@ class AutomataOperadorComparacion {
             }
             return true;
         }
-
         // Comillas dobles: permite escapes
         if (inicio == '"' && fin == '"') {
             boolean escape = false;
@@ -175,7 +159,6 @@ class AutomataOperadorComparacion {
             }
             return !escape; // importante: no debe quedar \ colgado justo antes del cierre
         }
-
         return false;
     }
 }

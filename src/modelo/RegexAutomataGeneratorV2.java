@@ -83,11 +83,16 @@ public class RegexAutomataGeneratorV2 extends JFrame {
         char delimitadorCadena = ' ';
 
         // Lista de operadores de comparación válidos en bash
-        String[] comparadores = {"-eq", "-ne", "-lt", "-le", "-gt", "-ge"};
+        // Lista de operadores múltiples (de comparación y lógicos principalmente)
+        String[] operadoresMultiples = {
+                "==", "!=", "<=", ">=", "-eq", "-ne", "-lt", "-le", "-gt", "-ge", "&&", "||", "**", "++", "--"
+        };
 
-        for (int i = 0; i < linea.length(); i++) {
+        int i = 0;
+        while (i < linea.length()) {
             char c = linea.charAt(i);
 
+            // Si estamos dentro de una cadena
             if (dentroCadena) {
                 buffer.append(c);
                 if (c == delimitadorCadena) {
@@ -95,9 +100,11 @@ public class RegexAutomataGeneratorV2 extends JFrame {
                     buffer.setLength(0);
                     dentroCadena = false;
                 }
+                i++;
                 continue;
             }
 
+            // Inicia cadena (comilla simple o doble)
             if (c == '"' || c == '\'') {
                 if (buffer.length() > 0) {
                     tokens.add(buffer.toString());
@@ -106,40 +113,63 @@ public class RegexAutomataGeneratorV2 extends JFrame {
                 dentroCadena = true;
                 delimitadorCadena = c;
                 buffer.append(c);
-            } else if (Character.isWhitespace(c)) {
+                i++;
+                continue;
+            }
+
+            // Espacio: termina token
+            if (Character.isWhitespace(c)) {
                 if (buffer.length() > 0) {
                     tokens.add(buffer.toString());
                     buffer.setLength(0);
                 }
-            } else {
-                buffer.append(c);
+                i++;
+                continue;
+            }
 
-                // Verificar si lo que llevamos acumulado es un operador de comparación completo
-                for (String op : comparadores) {
-                    if (buffer.toString().equals(op)) {
-                        tokens.add(buffer.toString());
-                        buffer.setLength(0);
+            // Intentamos leer un operador múltiple (2 o 3 caracteres)
+            boolean operadorDetectado = false;
+            for (String op : operadoresMultiples) {
+                int len = op.length();
+                if (i + len <= linea.length()) {
+                    String posible = linea.substring(i, i + len);
+                    if (posible.equals(op)) {
+                        if (buffer.length() > 0) {
+                            tokens.add(buffer.toString());
+                            buffer.setLength(0);
+                        }
+                        tokens.add(posible);
+                        i += len;
+                        operadorDetectado = true;
                         break;
                     }
                 }
+            }
+            if (operadorDetectado) continue;
 
-                // Si el siguiente carácter es espacio o separador, vaciar el buffer
-                if (i + 1 == linea.length() || Character.isWhitespace(linea.charAt(i + 1)) ||
-                        "[](){};,+-*/=%<>!&|".indexOf(linea.charAt(i + 1)) != -1) {
-                    if (buffer.length() > 0) {
-                        tokens.add(buffer.toString());
-                        buffer.setLength(0);
-                    }
+            // Si no es operador múltiple, agregamos carácter al buffer
+            buffer.append(c);
+            i++;
+
+            // Si el siguiente carácter es separador, terminamos el token actual
+            if (i == linea.length() ||
+                    Character.isWhitespace(linea.charAt(i)) ||
+                    "[](){};,+-*/=%<>!&|".indexOf(linea.charAt(i)) != -1) {
+                if (buffer.length() > 0) {
+                    tokens.add(buffer.toString());
+                    buffer.setLength(0);
                 }
             }
         }
 
+// Agrega lo que queda en el buffer
         if (buffer.length() > 0) tokens.add(buffer.toString());
+
         return tokens;
     }
 
 
-    private TipoToken clasificar(String lexema) {
+        private TipoToken clasificar(String lexema) {
         if (AutomataOperadorComparacion.reconocer(lexema)) return TipoToken.COMPARISON_OPERATOR;
         if (AutomataPalabraClave.reconocer(lexema)) return TipoToken.KEYWORD;
         if (AutomataNumeroNatural.reconocer(lexema)) return TipoToken.NATURAL_NUMBER;
